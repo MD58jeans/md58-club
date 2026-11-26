@@ -1,0 +1,73 @@
+{
+  "_nota": "Locales del Club: la clave es el código del QR (/r/<código>), znube = Origen - Sitio de Z Nube. Generado desde bot/contenido.json el 26/11/2026.",
+  "locales": {
+    "cabildo": {
+      "nombre": "Cabildo",
+      "znube": "CABILDO"
+    },
+    "santa_fe": {
+      "nombre": "Santa Fe",
+      "znube": "LAESQUINASANTAFE"
+    },
+    "martinez": {
+      "nombre": "Martínez",
+      "znube": "Martinez"
+    },
+    "lvs": {
+      "nombre": "San Isidro (LVS)",
+      "znube": "LVS (1)"
+    },
+    "new_generation": {
+      "nombre": "San Isidro (New Generation)",
+      "znube": "NEW GENERATION SAN ISIDRO"
+    },
+    "san_fernando": {
+      "nombre": "San Fernando",
+      "znube": "San Fernando"
+    },
+    "pilar": {
+      "nombre": "Pilar",
+      "znube": "LVP"
+    },
+    "celebrity": {
+      "nombre": "Celebrity (Pilar)",
+      "znube": "CLB"
+    },
+    "escobar": {
+      "nombre": "Escobar",
+      "znube": "ESCOBAR"
+    },
+    "la_esquina": {
+      "nombre": "La Esquina (San Miguel)",
+      "znube": "LE"
+    },
+    "las_vegas": {
+      "nombre": "Las Vegas (San Miguel)",
+      "znube": "LV"
+    },
+    "moron": {
+      "nombre": "Morón",
+      "znube": "LVM"
+    },
+    "lujan": {
+      "nombre": "Luján",
+      "znube": "LUJAN"
+    },
+    "mercedes": {
+      "nombre": "Mercedes",
+      "znube": "MERCEDES"
+    },
+    "san_martin": {
+      "nombre": "San Martín",
+      "znube": "SAN MARTIN"
+    },
+    "la_esquina_san_martin": {
+      "nombre": "La Esquina San Martín",
+      "znube": "LESANMAR"
+    },
+    "zarate": {
+      "nombre": "Zárate",
+      "znube": "ZARATE"
+    }
+  }
+}

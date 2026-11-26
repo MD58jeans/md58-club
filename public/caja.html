@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es-AR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MD58 Club · Caja</title><link rel="stylesheet" href="/estilos.css"></head>
+<body>
+<header class="marca"><span class="logo">MD58</span><span class="club">CLUB · CAJA</span></header>
+<main>
+  <h1 id="local">Caja</h1>
+  <p class="sub">Identificá al socio en cada venta: escaneá su tarjeta o escribí su DNI, y cargá el número de comprobante.</p>
+  <form id="f" novalidate>
+    <button type="button" class="boton secundario" id="escanear" hidden>Escanear tarjeta</button>
+    <video id="video" playsinline muted hidden></video>
+    <label>DNI del socio<input name="dni" inputmode="numeric" maxlength="10" required></label>
+    <p id="socio" class="chico"></p>
+    <label>N° de comprobante (ticket)<input name="comprobante" maxlength="40" required></label>
+    <label id="l-vend" hidden>Vendedor<select name="vendedor"><option value="">—</option></select></label>
+    <p class="error" id="err" hidden></p><p class="ok" id="ok" hidden></p>
+    <button class="boton">Guardar compra</button>
+  </form>
+</main>
+<script src="/caja.js"></script></body></html>

@@ -1,0 +1,42 @@
+# Blueprint de Render para el MD58 Club.
+# Render > New > Blueprint > Public Git Repository: https://github.com/MD58jeans/md58-club
+# Única variable a mano: PANEL_USUARIOS (Usuario:clave). Las claves de notificaciones se generan solas.
+services:
+  - type: web
+    name: md58-club
+    runtime: node
+    region: virginia
+    plan: starter
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /salud
+    autoDeploy: false
+    domains:
+      - md58club.com
+      - www.md58club.com
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: md58-club-db, property: connectionString }
+      - key: SECRET
+        generateValue: true
+      - key: BASE_URL
+        value: https://md58club.com
+      - key: NODE_VERSION
+        value: "22"
+      - key: CAJA_ACTIVA
+        value: "0"
+      - key: EMAIL_PROVEEDOR
+        value: consola
+      # Claves de notificaciones: se generan solas en el primer arranque y quedan en la base (no hace falta cargarlas).
+      - key: CONTACTO_DATOS
+        value: gerencia@md58jeans.com.ar
+      # La única que se completa a mano al crear: usuario y clave del panel, ej. Braian:una-clave-larga
+      - key: PANEL_USUARIOS
+        sync: false
+      # CAJA_CLAVES se agrega recién si se activa la caja (Plan B).
+databases:
+  - name: md58-club-db
+    databaseName: md58club
+    region: virginia
+    plan: basic-256mb
+    postgresMajorVersion: "16"

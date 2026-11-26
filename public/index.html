@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MD58 Club</title>
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MD58 Club">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
+<link rel="icon" href="/iconos/icono-192.png">
+<link id="manifest" rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+<header class="marca"><span class="logo">MD58</span><span class="club">CLUB</span></header>
+<main id="app"><p class="cargando">Cargando…</p></main>
+<footer class="pie"><a href="/terminos">Términos y datos personales</a></footer>
+<template id="t-registro">
+  <section>
+    <h1>Sumate al MD58 Club</h1>
+    <p class="sub">Registrate en 1 minuto y te regalamos <b>15% OFF</b> para usar en enero.</p>
+    <p class="local" data-local></p>
+    <form novalidate>
+      <div class="fila2">
+        <label>Nombre<input name="nombre" autocomplete="given-name" required maxlength="60"></label>
+        <label>Apellido<input name="apellido" autocomplete="family-name" required maxlength="60"></label>
+      </div>
+      <label>DNI<input name="dni" inputmode="numeric" pattern="[0-9]*" required maxlength="10" placeholder="Sin puntos"></label>
+      <label>Celular<input name="celular" type="tel" inputmode="tel" autocomplete="tel-national" required placeholder="Ej. 11 2345 6789"></label>
+      <label>Email<input name="email" type="email" inputmode="email" autocomplete="email" required></label>
+      <label>Fecha de nacimiento<input name="nacimiento" type="date" required></label>
+      <label><span>Localidad <span class="opc">(opcional)</span></span><input name="localidad" autocomplete="address-level2" maxlength="60"></label>
+      <label data-vendedor hidden><span>¿Quién te atendió? <span class="opc">(opcional)</span></span><select name="vendedor"><option value="">—</option></select></label>
+      <label class="check"><input type="checkbox" name="acepta_datos"> <span>Acepto los <a href="/terminos" target="_blank">términos</a> y el uso de mis datos para el Club.</span></label>
+      <label class="check"><input type="checkbox" name="acepta_promos"> <span>Quiero recibir novedades y beneficios. <span class="opc">(opcional)</span></span></label>
+      <p class="error" data-error hidden></p>
+      <button type="submit" class="boton">Quiero ser socio</button>
+    </form>
+    <p class="chico">¿Ya sos socio? <a href="/recuperar">Abrí tu tarjeta</a></p>
+  </section>
+</template>
+<template id="t-tarjeta">
+  <section>
+    <div class="tarjeta">
+      <div class="t-arriba"><span class="logo">MD58</span><span class="club">CLUB</span></div>
+      <div class="t-nombre" data-nombre></div>
+      <div class="t-socio">Socio N° <span data-dni></span></div>
+      <div class="t-qr" data-qr></div>
+    </div>
+    <div class="beneficio" data-beneficio hidden></div>
+    <div class="aviso" data-email hidden>Te mandamos un mail para confirmar tu email. <button type="button" class="link" data-reenviar>Reenviar</button></div>
+    <div class="bloque" data-instalar hidden>
+      <h2>Guardá tu tarjeta en el celular</h2>
+      <div data-ios hidden>
+        <ol>
+          <li>Tocá <b>Compartir</b> <span class="icono-compartir" aria-hidden="true">⬆︎</span> (abajo en Safari).</li>
+          <li>Elegí <b>Agregar a inicio</b> y después <b>Agregar</b>.</li>
+          <li>Abrí <b>MD58 Club</b> desde el ícono nuevo y activá las notificaciones.</li>
+        </ol>
+        <p class="chico" data-ios-no-safari hidden>Si estás en otro navegador (Instagram, Chrome), abrí este link en <b>Safari</b>.</p>
+      </div>
+      <div data-android hidden>
+        <button type="button" class="boton" data-boton-instalar hidden>Agregar a la pantalla de inicio</button>
+        <p data-android-manual>Tocá el menú <b>⋮</b> de Chrome y elegí <b>Agregar a la pantalla principal</b> (o <b>Instalar app</b>).</p>
+      </div>
+    </div>
+    <div class="bloque" data-notif hidden>
+      <h2>Enterate primero</h2>
+      <p>Avisos de ingresos en tu talle, preventas y beneficios. Nada de spam.</p>
+      <button type="button" class="boton" data-activar>Activar notificaciones</button>
+      <p class="chico" data-notif-estado></p>
+    </div>
+    <label class="check bloque"><input type="checkbox" data-promos> <span>Quiero recibir novedades y beneficios de MD58.</span></label>
+  </section>
+</template>
+<template id="t-recuperar">
+  <section>
+    <h1>Abrí tu tarjeta</h1>
+    <p class="sub">Poné tu DNI y te mandamos el link a tu email.</p>
+    <form novalidate><label>DNI<input name="dni" inputmode="numeric" required maxlength="10"></label>
+      <p class="error" data-error hidden></p><button class="boton">Mandarme el link</button></form>
+    <p class="ok" data-ok hidden></p>
+  </section>
+</template>
+<template id="t-inicio">
+  <section>
+    <h1>MD58 Club</h1>
+    <p class="sub">Para sumarte, escaneá el QR que está en la caja de tu local MD58.</p>
+    <p><a class="boton secundario" href="/recuperar">Ya soy socio: abrir mi tarjeta</a></p>
+  </section>
+</template>
+<script src="/vendor/qrcode.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

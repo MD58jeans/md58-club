@@ -1,0 +1,22 @@
+{
+  "_nota": "Vendedores por local (código del QR -> lista de nombres) para el desplegable del registro. Opcional: si un local no tiene lista, el campo no aparece. Se edita acá y se vuelve a publicar.",
+  "vendedores": {
+    "cabildo": [],
+    "santa_fe": [],
+    "martinez": [],
+    "lvs": [],
+    "new_generation": [],
+    "san_fernando": [],
+    "pilar": [],
+    "celebrity": [],
+    "escobar": [],
+    "la_esquina": [],
+    "las_vegas": [],
+    "moron": [],
+    "lujan": [],
+    "mercedes": [],
+    "san_martin": [],
+    "la_esquina_san_martin": [],
+    "zarate": []
+  }
+}
