@@ -18,7 +18,7 @@ const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = crearPush(env) }) {
   const SECRET = env.SECRET;
   if (!SECRET || SECRET.length < 32) throw new Error('Falta SECRET (32+ caracteres al azar)');
-  const BASE = (env.BASE_URL || 'http://localhost:' + (env.PORT || 8080)).replace(/\/$/, '');
+  const BASE = (env.BASE_URL || env.RENDER_EXTERNAL_URL || 'http://localhost:' + (env.PORT || 8080))   /* RENDER_EXTERNAL_URL: la pone Render sola mientras no haya dominio propio */.replace(/\/$/, '');
   const limRegistro = limitador(Number(env.LIMITE_REGISTRO || 20), 10 * 60e3);   // por IP cada 10 min (un local con wifi compartido registra muchos)
   const limRecuperar = limitador(5, 10 * 60e3);
   const cajaActiva = env.CAJA_ACTIVA === '1';
