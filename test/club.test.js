@@ -231,3 +231,18 @@ test('claves de notificaciones: se generan una vez y se reutilizan', async () =>
   assert.deepEqual(a, b);                                                   // el segundo arranque usa las mismas
   assert.deepEqual(await clavesVapid(pool, { VAPID_PUBLIC: 'x', VAPID_PRIVATE: 'y' }), {});   // si vienen por variable, mandan esas
 });
+
+test('email por Resend: manda bien, y si falla no rompe; sin clave queda en consola', async () => {
+  const { crearCorreo } = require('../lib/correo');
+  const llamadas = [];
+  const ok = crearCorreo({ EMAIL_PROVEEDOR: 'resend', RESEND_API_KEY: 'k' }, async (url, o) => { llamadas.push({ url, o }); return { ok: true, status: 200, text: async () => '' }; });
+  assert.equal(ok.proveedor, 'resend');
+  assert.deepEqual(await ok.enviar({ para: 'a@b.com', asunto: 'x', texto: 'y' }), { ok: true });
+  assert.equal(llamadas[0].url, 'https://api.resend.com/emails');
+  const cuerpo = JSON.parse(llamadas[0].o.body); assert.equal(cuerpo.from, 'MD58 Club <club@md58club.com>'); assert.deepEqual(cuerpo.to, ['a@b.com']);
+  const mal = crearCorreo({ EMAIL_PROVEEDOR: 'resend', RESEND_API_KEY: 'k' }, async () => ({ ok: false, status: 403, text: async () => 'dominio sin verificar' }));
+  assert.deepEqual(await mal.enviar({ para: 'a@b.com', asunto: 'x', texto: 'y' }), { ok: false });
+  const caido = crearCorreo({ EMAIL_PROVEEDOR: 'resend', RESEND_API_KEY: 'k' }, async () => { throw new Error('sin red'); });
+  assert.deepEqual(await caido.enviar({ para: 'a@b.com', asunto: 'x', texto: 'y' }), { ok: false });
+  assert.equal(crearCorreo({ EMAIL_PROVEEDOR: 'resend' }).proveedor, 'consola');
+});

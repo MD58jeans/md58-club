@@ -26,7 +26,8 @@ services:
       - key: CAJA_ACTIVA
         value: "0"
       - key: EMAIL_PROVEEDOR
-        value: consola
+        value: resend
+      # RESEND_API_KEY: se carga a mano en Render > md58-club > Environment (sin ella, los mails quedan en consola).
       # Claves de notificaciones: se generan solas en el primer arranque y quedan en la base (no hace falta cargarlas).
       - key: CONTACTO_DATOS
         value: gerencia@md58jeans.com.ar
