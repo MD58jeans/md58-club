@@ -74,7 +74,7 @@ test('alta: token, tarjeta con 15% para enero, consentimientos y email de confir
   assert.equal(t.j.dni, d.dni); assert.equal(t.j.promos, true); assert.equal(t.j.email_verificado, false);
   assert.equal(t.j.beneficios.length, 1); const b = t.j.beneficios[0];
   assert.equal(b.porcentaje, 15); assert.match(b.codigo, /^MD-[A-Z2-9]{8}$/);
-  assert.equal(new Date(b.desde).toISOString().slice(0, 10), '2026-01-02'); assert.equal(new Date(b.hasta).toISOString().slice(0, 10), '2026-01-31');
+  assert.equal(new Date(b.desde).toISOString().slice(0, 10), '2027-01-02'); assert.equal(new Date(b.hasta).toISOString().slice(0, 10), '2027-01-31');
   assert.ok(t.j.qr.startsWith('MD58C:'));
   const k = (await pool.query("SELECT tipo, valor FROM consentimientos c JOIN clientes x ON x.id=c.cliente_id WHERE x.dni=$1 ORDER BY tipo", [d.dni])).rows;
   assert.deepEqual(k, [{ tipo: 'datos', valor: true }, { tipo: 'promos', valor: true }]);
@@ -263,4 +263,13 @@ test('panel: subir base histórica por CSV (con clave, no duplica, saltea "revis
   assert.equal(d.nuevas, 0); assert.equal(d.actualizadas, 2);   // subirla de nuevo no duplica
   r = await fetch(base + '/panel/api/importar-historicos', { method: 'POST', headers: h, body: 'a,b\n1,2\n' });
   assert.equal(r.status, 400);
+});
+
+test('migración 003: corrige la bienvenida cargada con enero 2026 a enero 2027', async () => {
+  const fs = require('fs'), path = require('path');
+  const c = (await pool.query("INSERT INTO clientes (dni, celular, nombre, estado) VALUES ('39000001','5491179000001','Mig','registrado') RETURNING id")).rows[0];
+  await pool.query("INSERT INTO beneficios (cliente_id, tipo, porcentaje, vigencia_desde, vigencia_hasta, codigo) VALUES ($1,'bienvenida',15,'2026-01-02','2026-01-31','MD-MIGTEST1')", [c.id]);
+  await pool.query(fs.readFileSync(path.join(__dirname, '..', 'migraciones', '003_bienvenida_2027.sql'), 'utf8'));
+  const b = (await pool.query("SELECT to_char(vigencia_desde,'YYYY-MM-DD') d, to_char(vigencia_hasta,'YYYY-MM-DD') h FROM beneficios WHERE codigo='MD-MIGTEST1'")).rows[0];
+  assert.deepEqual(b, { d: '2027-01-02', h: '2027-01-31' });
 });

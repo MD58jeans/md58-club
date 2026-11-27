@@ -85,7 +85,7 @@
       const box = $(f, '[data-beneficio]'); box.hidden = false;
       const pct = document.createElement('div'); pct.className = 'pct'; pct.textContent = `${b.porcentaje}% OFF`;
       const t = document.createElement('div');
-      t.textContent = `${recienRegistrado ? '¡Bienvenido/a al Club! ' : ''}Tu beneficio de bienvenida para usar del ${fecha(b.desde)} al ${fecha(b.hasta)} en cualquier local MD58.`;
+      t.textContent = `${recienRegistrado ? '¡Bienvenido/a al Club! ' : ''}Tu beneficio de bienvenida para usar del ${fecha(b.desde)} al ${fecha(b.hasta)} en cualquier local MD58. No se acumula con otras promociones.`;
       const c = document.createElement('div'); c.className = 'cod'; c.textContent = 'Código ' + b.codigo;
       box.append(pct, t, c);
     }
@@ -166,7 +166,7 @@
     const t = await api('/api/textos');
     const s = document.createElement('section'); const h = document.createElement('h1'); h.textContent = 'Términos y datos personales';
     const p = document.createElement('div'); p.className = 'terminos';
-    p.textContent = `${t.datos}\n\n${t.promos}\n\nBeneficio de bienvenida: ${t.bienvenida.porcentaje}% de descuento en una compra, del ${fecha(t.bienvenida.desde)} al ${fecha(t.bienvenida.hasta)}, personal, de un solo uso, en locales MD58. Las condiciones de uso (productos alcanzados y si se suma a otras promociones) se informan antes de enero.\n\nResponsable de los datos: MD58.${t.contacto ? ' Para ver, corregir o borrar tus datos escribí a ' + t.contacto + '.' : ''} La Agencia de Acceso a la Información Pública, órgano de control de la Ley 25.326, atiende denuncias y reclamos sobre protección de datos personales.`;
+    p.textContent = `${t.datos}\n\n${t.promos}\n\nBeneficio de bienvenida: ${t.bienvenida.porcentaje}% de descuento en una compra, del ${fecha(t.bienvenida.desde)} al ${fecha(t.bienvenida.hasta)}, personal, de un solo uso, en locales MD58. No se acumula con otras promociones.\n\nResponsable de los datos: MD58.${t.contacto ? ' Para ver, corregir o borrar tus datos escribí a ' + t.contacto + '.' : ''} La Agencia de Acceso a la Información Pública, órgano de control de la Ley 25.326, atiende denuncias y reclamos sobre protección de datos personales.`;
     s.append(h, p); app.replaceChildren(s);
   }
 
