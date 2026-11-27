@@ -188,8 +188,8 @@ test('caja (plan B): clave por local, busca mostrando lo mínimo y guarda el com
   assert.deepEqual((await pedir('POST', '/caja/api/buscar', { headers: C, cuerpo: { dni: '99999999' } })).j, { socio: false });
   const qr = (await pedir('GET', '/api/socio/tarjeta', { headers: { Authorization: 'Bearer ' + s.j.token } })).j.qr;
   assert.equal((await pedir('POST', '/caja/api/buscar', { headers: C, cuerpo: { qr } })).j.dni, d.dni);
-  assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: d.dni, comprobante: 'B-0001-00012345' } })).status, 200);
-  assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: d.dni, comprobante: 'B-0001-00012345' } })).status, 409);
+  assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: d.dni, comprobante: 'B-0001-00012345', fin: '45' } })).status, 200);
+  assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: d.dni, comprobante: 'B-0001-00012345', fin: '45' } })).status, 409);
   const cc = (await pool.query('SELECT local, cargado_por FROM compras_caja WHERE comprobante=$1', ['B-0001-00012345'])).rows[0];
   assert.deepEqual(cc, { local: 'LV', cargado_por: 'caja:las_vegas' });
 });
@@ -287,7 +287,7 @@ test('iPhone: la página /t/<sesión> trae el manifest del socio (el ícono inst
 
 test('caja (plan B): guarda el DNI aunque no sea socio; claves derivadas y visibles solo en el panel', async () => {
   const C = { Authorization: auth('las_vegas', 'caja-clave-1'), 'X-Caja': '1' };
-  const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999001', comprobante: 'FCV B 0001-00099999' } });
+  const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999001', comprobante: 'FCV B 0001-00099999', fin: '99' } });
   assert.equal(r.status, 200); assert.equal(r.j.socio, false);
   const cc = (await pool.query("SELECT dni, cliente_id FROM compras_caja WHERE comprobante='FCV B 0001-00099999'")).rows[0];
   assert.deepEqual(cc, { dni: '30999001', cliente_id: null });
@@ -301,9 +301,11 @@ test('caja (plan B): guarda el DNI aunque no sea socio; claves derivadas y visib
   await new Promise(ok => s2.close(ok));
 });
 
-test('caja rápida: alcanza con el DNI (sin comprobante), varias veces', async () => {
+test('caja rápida: DNI + últimos 2 números de la factura (obligatorios)', async () => {
   const C = { Authorization: auth('las_vegas', 'caja-clave-1'), 'X-Caja': '1' };
-  for (let k = 0; k < 2; k++) { const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999002' } }); assert.equal(r.status, 200, JSON.stringify(r.j)); }
-  assert.equal((await pool.query("SELECT count(*)::int n FROM compras_caja WHERE dni='30999002' AND comprobante IS NULL")).rows[0].n, 2);
+  for (const fin of ['68', '68']) { const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999002', fin } }); assert.equal(r.status, 200, JSON.stringify(r.j)); }
+  assert.equal((await pool.query("SELECT count(*)::int n FROM compras_caja WHERE dni='30999002' AND fin_factura='68' AND comprobante IS NULL")).rows[0].n, 2);
+  assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999002' } })).status, 422);              // sin los 2 números
+  assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999002', fin: '6' } })).status, 422);
   assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '12' } })).status, 422);
 });

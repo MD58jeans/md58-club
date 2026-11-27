@@ -14,11 +14,13 @@
     if (r.dni) f.dni.value = r.dni;
   }
   f.dni.addEventListener('change', () => f.dni.value && buscar({ dni: f.dni.value }));
+  f.fin.addEventListener('input', () => { f.fin.value = f.fin.value.replace(/\D/g, '').slice(0, 2); });
+  f.dni.addEventListener('input', () => { if (f.dni.value.replace(/\D/g, '').length === 8) f.fin.focus(); });   // DNI completo: salta solo a la factura
   f.addEventListener('submit', async e => {
     e.preventDefault(); $('err').hidden = $('ok').hidden = true;
-    const r = await api('/caja/api/compra', { dni: f.dni.value, comprobante: f.comprobante.value, vendedor: f.vendedor.value });
+    const r = await api('/caja/api/compra', { dni: f.dni.value, fin: f.fin.value, vendedor: f.vendedor.value });
     if (r.ok) { $('ok').textContent = r.socio ? '✓ Guardado (socio del Club).' : '✓ Guardado. No es socio todavía: invitalo con el QR del local (15% en enero).'; $('ok').hidden = false;
-      f.dni.value = f.comprobante.value = ''; $('socio').textContent = ''; contar(); f.dni.focus(); }
+      f.dni.value = f.fin.value = ''; $('socio').textContent = ''; contar(); f.dni.focus(); }
     else { $('err').textContent = r.error || 'No se pudo guardar'; $('err').hidden = false; }
   });
   // Escaneo con la cámara (Chrome en Android tiene lector de QR nativo; en iPhone se escribe el DNI).
