@@ -312,3 +312,12 @@ test('caja rápida: DNI + últimos 2 números de la factura (obligatorios)', asy
   assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999002', fin: '6' } })).status, 422);
   assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '12' } })).status, 422);
 });
+
+test('agente: lectura de cargas de caja solo con su clave', async () => {
+  assert.equal((await pedir('GET', '/agente/api/compras-caja')).status, 401);
+  assert.equal((await pedir('GET', '/agente/api/compras-caja', { headers: { Authorization: 'Bearer mala' } })).status, 401);
+  const res = await (await fetch(base + '/panel/api/resumen', { headers: { Authorization: auth('Braian', 'clave-larga-1') } })).json();
+  assert.equal(res.claveAgente.length, 32);
+  const r = await pedir('GET', '/agente/api/compras-caja?desde=2020-01-01', { headers: { Authorization: 'Bearer ' + res.claveAgente } });
+  assert.equal(r.status, 200); assert.ok(r.j.filas.some(f => f.fin_factura === '68'));
+});

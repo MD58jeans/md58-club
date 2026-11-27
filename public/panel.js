@@ -23,6 +23,7 @@
     tabla('t-local', [[f => nombre(f.local), 'Local'], ['hoy', 'Hoy', 1], ['n', 'Total', 1], [f => pct(f.app, f.n), 'App'], [f => pct(f.notif, f.n), 'Notif.']], d.porLocal);
     tabla('t-vendedor', [[f => nombre(f.local), 'Local'], ['vendedor', 'Vendedor'], ['n', 'Registros', 1]], d.porVendedor);
     if (d.accesosCaja && d.accesosCaja.length) { $('caja-accesos').hidden = false; tabla('t-caja', [['local', 'Local'], ['usuario', 'Usuario'], ['clave', 'Clave']], d.accesosCaja); }
+    if (d.claveAgente) $('clave-agente').textContent = d.claveAgente;
     tabla('t-dia', [['dia', 'Día'], ['n', 'Registros', 1]], d.porDia);
   }
   $('f-push').addEventListener('submit', async e => {
@@ -41,5 +42,6 @@
       cargar().catch(() => {});
     } catch (err) { out.textContent = 'No se pudo subir: ' + err.message; }
   });
+  $('copiar-agente').addEventListener('click', async e => { try { await navigator.clipboard.writeText($('clave-agente').textContent); e.target.textContent = 'Copiada'; } catch { e.target.textContent = 'Seleccionala y copiala'; } });
   await cargar(); setInterval(() => cargar().catch(() => {}), 60000);
 })();

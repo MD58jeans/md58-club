@@ -142,7 +142,7 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
     const p = url.pathname;
     if (req.method === 'GET' && p === '/panel') return estatico(res, 'panel.html');
     if (req.method === 'GET' && p === '/panel/api/resumen') return json(res, { usuario: quien, ...(await club.resumen(pool)), locales: LOCALES, push: push.activo, caja: cajaActiva,
-      accesosCaja: cajaActiva && !env.CAJA_CLAVES ? Object.entries(CAJAS).map(([c, l]) => ({ local: l.nombre, usuario: c, clave: claveCaja(c) })) : [] });
+      claveAgente, accesosCaja: cajaActiva && !env.CAJA_CLAVES ? Object.entries(CAJAS).map(([c, l]) => ({ local: l.nombre, usuario: c, clave: claveCaja(c) })) : [] });
     if (req.method === 'GET' && p === '/panel/export.csv') {
       const csv = await club.exportarCsv(pool, quien);
       cabeceras(res, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="md58club_socios_${new Date().toISOString().slice(0, 10)}.csv"`, 'Cache-Control': 'no-store' });
@@ -197,9 +197,27 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
     json(res, { error: 'no existe' }, 404);
   }
 
+  // Acceso de SOLO LECTURA para el agente de Clientes (CRM): cargas de caja, para cruzarlas con las facturas de Z Nube.
+  // La clave se deriva del SECRET, gerencia la ve en el panel y la carga en el formulario seguro del agente (nunca en el chat).
+  const claveAgente = require('crypto').createHmac('sha256', SECRET).update('agente-crm').digest('hex').slice(0, 32);
+  async function rutaAgente(req, res, url) {
+    const h = req.headers.authorization || '';
+    if (!(h.startsWith('Bearer ') && require('crypto').timingSafeEqual(Buffer.from(require('crypto').createHash('sha256').update(h.slice(7)).digest()), Buffer.from(require('crypto').createHash('sha256').update(claveAgente).digest()))))
+      return json(res, { error: 'no autorizado' }, 401);
+    if (req.method === 'GET' && url.pathname === '/agente/api/compras-caja') {
+      const desde = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get('desde') || '') ? url.searchParams.get('desde') : new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+      const r = await pool.query(`SELECT cc.id, cc.dni, cc.local, cc.vendedor, cc.comprobante, cc.fin_factura, cc.fecha, cc.cargado_por, (c.fecha_alta IS NOT NULL) AS socio
+        FROM compras_caja cc LEFT JOIN clientes c ON c.id = cc.cliente_id WHERE cc.fecha >= $1::date ORDER BY cc.fecha`, [desde]);
+      await club.auditar(pool, 'agente_lectura_caja', null, 'agente-crm', { desde, filas: r.rowCount });
+      return json(res, { desde, filas: r.rows });
+    }
+    json(res, { error: 'no existe' }, 404);
+  }
+
   return http.createServer((req, res) => {
     const url = new URL(req.url, 'http://x');
-    const manejar = url.pathname === '/panel' || url.pathname.startsWith('/panel/') ? rutaPanel(req, res, url)
+    const manejar = url.pathname.startsWith('/agente/') ? rutaAgente(req, res, url)
+      : url.pathname === '/panel' || url.pathname.startsWith('/panel/') ? rutaPanel(req, res, url)
       : url.pathname === '/caja' || url.pathname.startsWith('/caja/') ? rutaCaja(req, res, url)
       : rutaPublica(req, res, url).then(ok => { if (!ok) { cabeceras(res); res.writeHead(404); res.end('No existe'); } });
     Promise.resolve(manejar).catch(e => {
