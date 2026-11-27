@@ -52,7 +52,16 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
   async function rutaPublica(req, res, url) {
     const p = url.pathname;
     if (req.method === 'GET' && p === '/salud') { cabeceras(res, { 'Content-Type': 'text/plain' }); res.end('ok'); return true; }
-    if (req.method === 'GET' && (p === '/' || /^\/(r|t|v)\/[\w.-]+$/.test(p) || p === '/recuperar' || p === '/tarjeta' || p === '/terminos')) { estatico(res, 'index.html'); return true; }
+    const mt = p.match(/^\/t\/([\w.-]+)$/);
+    if (req.method === 'GET' && mt) {
+      // iPhone: la app instalada NO comparte datos con Safari y toma el manifest que se cargó con la página. Por eso la página de la
+      // tarjeta (/t/<sesión>) se sirve con el manifest del socio ya puesto: al "Agregar a inicio", el ícono abre directo su tarjeta.
+      const d = tok.verificar(SECRET, mt[1]);
+      let html = fs.readFileSync(path.join(PUB, 'index.html'), 'utf8');
+      if (d && d.t === 's') html = html.replace('href="/manifest.webmanifest"', `href="/manifest.webmanifest?t=${mt[1]}"`);
+      cabeceras(res, { 'Content-Type': TIPOS['.html'], 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' }); res.writeHead(200); res.end(html); return true;
+    }
+    if (req.method === 'GET' && (p === '/' || /^\/(r|v)\/[\w.-]+$/.test(p) || p === '/recuperar' || p === '/tarjeta' || p === '/terminos')) { estatico(res, 'index.html'); return true; }
     if (req.method === 'GET' && p === '/manifest.webmanifest') {
       // Manifest por socio: start_url lleva su sesión, así la app instalada (que en iPhone no comparte datos con Safari) abre su tarjeta.
       const t = url.searchParams.get('t'); const d = t && tok.verificar(SECRET, t);

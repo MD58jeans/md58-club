@@ -273,3 +273,14 @@ test('migración 003: corrige la bienvenida cargada con enero 2026 a enero 2027'
   const b = (await pool.query("SELECT to_char(vigencia_desde,'YYYY-MM-DD') d, to_char(vigencia_hasta,'YYYY-MM-DD') h FROM beneficios WHERE codigo='MD-MIGTEST1'")).rows[0];
   assert.deepEqual(b, { d: '2027-01-02', h: '2027-01-31' });
 });
+
+test('iPhone: la página /t/<sesión> trae el manifest del socio (el ícono instalado abre su tarjeta)', async () => {
+  const r = await registrar(socio()); assert.equal(r.status, 200);
+  const t = r.j.token;
+  const html = await (await fetch(base + '/t/' + t)).text();
+  assert.ok(html.includes(`href="/manifest.webmanifest?t=${t}"`));
+  const m = await (await fetch(base + '/manifest.webmanifest?t=' + t)).json();
+  assert.equal(m.start_url, '/t/' + t);
+  const falso = await (await fetch(base + '/t/token-falso')).text();
+  assert.ok(falso.includes('href="/manifest.webmanifest"') && !falso.includes('?t=token-falso'));   // token inválido: manifest genérico
+});

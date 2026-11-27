@@ -53,7 +53,7 @@
       boton.disabled = true; boton.textContent = 'Registrando…';
       try {
         const r = await api('/api/registro', { metodo: 'POST', cuerpo: d });
-        if (r.ok && r.token) { guardarSesion(r.token); history.replaceState(null, '', '/t/' + r.token); return tarjeta(r.token, true); }
+        if (r.ok && r.token) { guardarSesion(r.token); location.replace('/t/' + r.token + '?nuevo=1'); return; }   // recarga completa: así el iPhone toma el manifest con la sesión
         if (r.errores) {
           let primero = null;
           for (const [k, m] of Object.entries(r.errores)) {
@@ -174,11 +174,11 @@
   const ruta = location.pathname;
   let m;
   if ((m = ruta.match(/^\/r\/([\w-]+)$/))) registro(m[1]);
-  else if ((m = ruta.match(/^\/t\/([\w.-]+)$/))) tarjeta(m[1]);
+  else if ((m = ruta.match(/^\/t\/([\w.-]+)$/))) tarjeta(m[1], new URLSearchParams(location.search).get('nuevo') === '1');
   else if ((m = ruta.match(/^\/v\/([\w.-]+)$/))) verificarEmail(m[1]);
   else if (ruta === '/recuperar') recuperar();
   else if (ruta === '/terminos') terminos();
-  else { const s = leerSesion(); if (s) tarjeta(s); else inicio(); }
+  else { const s = leerSesion(); if (s && !instalada() && ruta !== '/t') location.replace('/t/' + s); else if (s) tarjeta(s); else inicio(); }   // en el navegador, la tarjeta siempre en /t/<sesión> (para instalar bien en iPhone)
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
 })();
