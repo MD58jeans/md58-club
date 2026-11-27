@@ -68,3 +68,7 @@ input[aria-invalid="true"] { border-color: var(--error); }
 .paso-final { border: 2px solid var(--negro); }
 .dni-grande { font-size: 28px; letter-spacing: .08em; text-align: center; min-height: 64px; }
 details summary { cursor: pointer; margin: 4px 0; }
+.checklist h2 { margin-bottom: 8px; }
+.paso-check { display: block; width: 100%; text-align: left; font: inherit; padding: 10px 12px; margin-top: 6px; border-radius: 10px; border: 1px solid var(--borde); background: var(--blanco); color: var(--negro); }
+button.paso-check { border: 2px solid var(--negro); font-weight: 700; cursor: pointer; }
+.paso-check.hecho { color: var(--ok); border-color: #cfe5d6; background: #f3faf5; }

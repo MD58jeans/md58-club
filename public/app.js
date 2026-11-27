@@ -129,6 +129,19 @@
       }
     }
     configurarNotificaciones(f, d, token);
+    // Lista de pasos arriba de todo: el cliente ve qué le falta (Axel creía tenerla "como app" sin haberla agregado a inicio).
+    const guardada = instalada() || d.estado === 'app_instalada' || d.estado === 'notificaciones';
+    const avisos = d.estado === 'notificaciones' || ('Notification' in window && Notification.permission === 'granted');
+    if (!guardada || !avisos) {
+      const lista = document.createElement('div'); lista.className = 'bloque checklist';
+      const h = document.createElement('h2'); h.textContent = 'Para terminar'; lista.append(h);
+      const item = (ok, txt, accion) => { const r = document.createElement(accion && !ok ? 'button' : 'div'); r.className = 'paso-check' + (ok ? ' hecho' : ''); if (accion && !ok) { r.type = 'button'; r.addEventListener('click', accion); }
+        r.textContent = (ok ? '✓ ' : '○ ') + txt; lista.append(r); };
+      item(true, 'Ya sos socio');
+      item(guardada, guardada ? 'Tarjeta guardada en el celular' : 'Agregá la tarjeta a la pantalla de inicio (no alcanza con tenerla abierta) — tocá acá', () => esIOS ? guiaIOS(true) : guiaAndroid(d, token, true));
+      item(avisos, avisos ? 'Avisos activados' : (esIOS && !instalada() ? 'Activá los avisos (desde el ícono, después del paso anterior)' : 'Activá los avisos — tocá acá'), esIOS && !instalada() ? null : () => { const b = document.querySelector('[data-activar]'); if (b && !b.disabled && !b.hidden) b.click(); else if (esAndroid) guiaAndroid(d, token, true); });
+      const tarj = f.querySelector('.tarjeta'); if (tarj) tarj.after(lista);
+    }
     app.replaceChildren(f);
   }
 
