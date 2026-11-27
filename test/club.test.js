@@ -298,6 +298,9 @@ test('caja (plan B): guarda el DNI aunque no sea socio; claves derivadas y visib
   const lv = res.accesosCaja.find(a => a.usuario === 'las_vegas'); assert.ok(lv && lv.clave.length === 10);
   assert.equal((await fetch(b2 + '/caja', { headers: { Authorization: auth('las_vegas', lv.clave) } })).status, 200);
   assert.equal((await fetch(b2 + '/caja', { headers: { Authorization: auth('pilar', lv.clave) } })).status, 401);   // la clave de un local no abre otro
+  const dep = res.accesosCaja.find(a => a.usuario === 'deposito'); assert.ok(dep);                                   // el depósito tiene caja…
+  assert.equal((await fetch(b2 + '/caja', { headers: { Authorization: auth('deposito', dep.clave) } })).status, 200);
+  assert.equal((await fetch(b2 + '/api/local/deposito')).status, 404);                                               // …pero no registro por QR
   await new Promise(ok => s2.close(ok));
 });
 

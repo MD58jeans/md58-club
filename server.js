@@ -11,6 +11,8 @@ const { crearPush } = require('./lib/push');
 const { cabeceras, json, leerJson, leerTexto, usuarioBasic, pedirClave, limitador, ipDe } = require('./lib/http');
 
 const LOCALES = require('./locales.json').locales;
+// Cajas internas: tienen acceso a /caja pero NO QR de registro ni cartel (Braian 27/11: el depósito, para pruebas de Andrea).
+const CAJAS = { ...LOCALES, deposito: { nombre: 'Depósito (pruebas)', znube: 'CENTRAL' } };
 const VENDEDORES = require('./vendedores.json').vendedores;
 const PUB = path.join(__dirname, 'public');
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
@@ -24,7 +26,7 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
   const cajaActiva = env.CAJA_ACTIVA === '1';
   // Claves de caja: si no vienen en CAJA_CLAVES, se derivan del SECRET (una por local, fijas) y gerencia las ve en el panel.
   const claveCaja = cod => require('crypto').createHmac('sha256', SECRET).update('caja:' + cod).digest('hex').slice(0, 10);
-  const CLAVES_CAJA = env.CAJA_CLAVES || Object.keys(LOCALES).map(c => `${c}:${claveCaja(c)}`).join(',');
+  const CLAVES_CAJA = env.CAJA_CLAVES || Object.keys(CAJAS).map(c => `${c}:${claveCaja(c)}`).join(',');
 
   const sesion = cl => tok.firmar(SECRET, { t: 's', id: cl.id, v: cl.token_version });
   const linkVerificar = cl => `${BASE}/v/${tok.firmar(SECRET, { t: 'e', id: cl.id, email: cl.email, exp: Date.now() + 7 * 864e5 })}`;
@@ -140,7 +142,7 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
     const p = url.pathname;
     if (req.method === 'GET' && p === '/panel') return estatico(res, 'panel.html');
     if (req.method === 'GET' && p === '/panel/api/resumen') return json(res, { usuario: quien, ...(await club.resumen(pool)), locales: LOCALES, push: push.activo, caja: cajaActiva,
-      accesosCaja: cajaActiva && !env.CAJA_CLAVES ? Object.entries(LOCALES).map(([c, l]) => ({ local: l.nombre, usuario: c, clave: claveCaja(c) })) : [] });
+      accesosCaja: cajaActiva && !env.CAJA_CLAVES ? Object.entries(CAJAS).map(([c, l]) => ({ local: l.nombre, usuario: c, clave: claveCaja(c) })) : [] });
     if (req.method === 'GET' && p === '/panel/export.csv') {
       const csv = await club.exportarCsv(pool, quien);
       cabeceras(res, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="md58club_socios_${new Date().toISOString().slice(0, 10)}.csv"`, 'Cache-Control': 'no-store' });
@@ -171,11 +173,11 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
   async function rutaCaja(req, res, url) {
     if (!cajaActiva) { cabeceras(res); res.writeHead(404); res.end('No existe'); return; }
     const local = usuarioBasic(req.headers.authorization, CLAVES_CAJA);   // usuario = código del local (ej. las_vegas)
-    if (!local || !LOCALES[local]) return pedirClave(res, 'MD58 Club caja');
+    if (!local || !CAJAS[local]) return pedirClave(res, 'MD58 Club caja');
     const p = url.pathname;
     if (req.method === 'GET' && p === '/caja') return estatico(res, 'caja.html');
     if (req.headers['x-caja'] !== '1') return json(res, { error: 'no' }, 403);
-    if (req.method === 'GET' && p === '/caja/api/local') return json(res, { local, nombre: LOCALES[local].nombre, vendedores: VENDEDORES[local] || [] });
+    if (req.method === 'GET' && p === '/caja/api/local') return json(res, { local, nombre: CAJAS[local].nombre, vendedores: VENDEDORES[local] || [] });
     if (req.method === 'POST' && p === '/caja/api/buscar') {
       const b = await leerJson(req);
       if (b.qr) { const d = tok.verificar(SECRET, String(b.qr).replace(/^MD58C:/, '')); if (!d || d.t !== 'c') return json(res, { socio: false });
@@ -189,7 +191,7 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
       if (!dni) return json(res, { error: 'Revisá el DNI (7 u 8 números)' }, 422);
       if (!/^\d{2}$/.test(fin)) return json(res, { error: 'Poné los últimos 2 números de la factura' }, 422);
       const vend = b.vendedor && (VENDEDORES[local] || []).includes(b.vendedor) ? b.vendedor : null;
-      const r = await club.cajaCompra(pool, { dni, local: LOCALES[local].znube, vendedor: vend, comprobante: comp, fin, quien: 'caja:' + local });
+      const r = await club.cajaCompra(pool, { dni, local: CAJAS[local].znube, vendedor: vend, comprobante: comp, fin, quien: 'caja:' + local });
       return json(res, r, r.ok ? 200 : 409);
     }
     json(res, { error: 'no existe' }, 404);
