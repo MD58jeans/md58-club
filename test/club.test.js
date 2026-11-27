@@ -284,3 +284,19 @@ test('iPhone: la página /t/<sesión> trae el manifest del socio (el ícono inst
   const falso = await (await fetch(base + '/t/token-falso')).text();
   assert.ok(falso.includes('href="/manifest.webmanifest"') && !falso.includes('?t=token-falso'));   // token inválido: manifest genérico
 });
+
+test('caja (plan B): guarda el DNI aunque no sea socio; claves derivadas y visibles solo en el panel', async () => {
+  const C = { Authorization: auth('las_vegas', 'caja-clave-1'), 'X-Caja': '1' };
+  const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '45307645', comprobante: 'FCV B 0001-00099999' } });
+  assert.equal(r.status, 200); assert.equal(r.j.socio, false);
+  const cc = (await pool.query("SELECT dni, cliente_id FROM compras_caja WHERE comprobante='FCV B 0001-00099999'")).rows[0];
+  assert.deepEqual(cc, { dni: '45307645', cliente_id: null });
+  // Sin CAJA_CLAVES: cada local tiene su clave derivada, y el panel las muestra
+  const env2 = { ...env, CAJA_CLAVES: '' }; const s2 = crearApp({ pool, env: env2 });
+  await new Promise(ok => s2.listen(0, '127.0.0.1', ok)); const b2 = `http://127.0.0.1:${s2.address().port}`;
+  const res = await (await fetch(b2 + '/panel/api/resumen', { headers: { Authorization: auth('Braian', 'clave-larga-1') } })).json();
+  const lv = res.accesosCaja.find(a => a.usuario === 'las_vegas'); assert.ok(lv && lv.clave.length === 10);
+  assert.equal((await fetch(b2 + '/caja', { headers: { Authorization: auth('las_vegas', lv.clave) } })).status, 200);
+  assert.equal((await fetch(b2 + '/caja', { headers: { Authorization: auth('pilar', lv.clave) } })).status, 401);   // la clave de un local no abre otro
+  await new Promise(ok => s2.close(ok));
+});

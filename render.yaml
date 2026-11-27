@@ -23,11 +23,11 @@ services:
         value: https://md58club.com
       # CLUB_VERSION: se cambia en cada entrega para que Render vuelva a desplegar el último código (repo público sin auto-deploy).
       - key: CLUB_VERSION
-        value: "2026-11-27d"
+        value: "2026-11-27e"
       - key: NODE_VERSION
         value: "22"
       - key: CAJA_ACTIVA
-        value: "0"
+        value: "1"
       - key: EMAIL_PROVEEDOR
         value: resend
       # RESEND_API_KEY: se carga a mano en Render > md58-club > Environment (sin ella, los mails quedan en consola).

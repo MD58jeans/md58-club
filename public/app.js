@@ -117,6 +117,8 @@
       }
       else {
         $(f, '[data-android]').hidden = false;
+        if (esAndroid) { const ver = $(f, '[data-ver-guia-android]'); ver.hidden = false; ver.addEventListener('click', () => guiaAndroid(d, token, true));
+          setTimeout(() => guiaAndroid(d, token, false), recienRegistrado ? 1200 : 600); }
         const bi = $(f, '[data-boton-instalar]');
         if (promptInstalar) { bi.hidden = false; $(f, '[data-android-manual]').hidden = true; }
         bi.addEventListener('click', async () => {
@@ -171,6 +173,42 @@
         .catch(() => { estado.textContent = Notification.permission === 'denied' ? 'Bloqueaste las notificaciones. Podés activarlas desde la configuración.' : 'No se pudo activar. Probá de nuevo.'; });
     });
   }
+  async function suscribir(d, token) {   // llamar SIEMPRE dentro de un toque (requisito de iPhone)
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: claveABytes(d.push) });
+    const r = await api('/api/socio/push', { metodo: 'POST', cuerpo: { suscripcion: sub.toJSON(), plataforma: esIOS ? 'ios' : esAndroid ? 'android' : 'otro' }, token });
+    if (!r.ok) throw new Error('servidor');
+  }
+
+  // Guía de Android: avisos + guardar en el celular, en una sola hoja con dos botones grandes.
+  function guiaAndroid(d, token, forzar) {
+    const CLAVE = 'md58club_guia_android';
+    try { if (!forzar && Date.now() - Number(localStorage.getItem(CLAVE) || 0) < 864e5) return; } catch {}
+    if (document.querySelector('[data-guia]')) return;
+    const g = plantilla('t-guia-android'); const raiz = $(g, '[data-guia]');
+    const bAvisos = $(raiz, '[data-g-avisos]'), eAvisos = $(raiz, '[data-g-avisos-estado]');
+    const bInst = $(raiz, '[data-g-instalar]'), eInst = $(raiz, '[data-g-instalar-estado]');
+    const soporta = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && d.push;
+    const avisosListos = () => { bAvisos.hidden = true; eAvisos.textContent = '✓ Avisos activados'; };
+    if (!soporta) { bAvisos.hidden = true; eAvisos.textContent = 'Este navegador no permite avisos. Abrí el link en Chrome.'; }
+    else if (Notification.permission === 'granted') { avisosListos(); suscribir(d, token).catch(() => {}); }
+    else if (Notification.permission === 'denied') { bAvisos.hidden = true; eAvisos.textContent = 'Los avisos están bloqueados: tocá el candado 🔒 arriba, junto a la dirección → Permisos → Notificaciones → Permitir.'; }
+    bAvisos.addEventListener('click', () => {
+      eAvisos.textContent = 'Tocá "Permitir" en el cartel…';
+      suscribir(d, token).then(avisosListos).catch(() => { eAvisos.textContent = Notification.permission === 'denied' ? 'Los bloqueaste: tocá el candado 🔒 arriba → Permisos → Notificaciones → Permitir.' : 'No se pudo. Probá de nuevo.'; });
+    });
+    const esSamsung = /SamsungBrowser/.test(ua);
+    const manual = esSamsung ? 'Tocá el menú ☰ (abajo a la derecha) → "Agregar página a" → "Pantalla de inicio".' : 'Tocá el menú ⋮ (arriba a la derecha) → "Agregar a la pantalla principal" (o "Instalar app") → "Instalar".';
+    bInst.addEventListener('click', async () => {
+      if (promptInstalar) { promptInstalar.prompt(); const r = await promptInstalar.userChoice; promptInstalar = null;
+        if (r.outcome === 'accepted') { bInst.hidden = true; eInst.textContent = '✓ Listo: ya la tenés en la pantalla de inicio.'; api('/api/socio/instalada', { metodo: 'POST', token }); return; } }
+      eInst.textContent = manual;
+    });
+    const cerrar = () => { try { localStorage.setItem(CLAVE, String(Date.now())); } catch {} raiz.remove(); };
+    $(raiz, '[data-cerrar]').addEventListener('click', cerrar); $(raiz, '[data-listo]').addEventListener('click', cerrar);
+    document.body.append(raiz);
+  }
+
   function claveABytes(b64) { const p = '='.repeat((4 - b64.length % 4) % 4); const s = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, c => c.charCodeAt(0)); }
 
   // ---------- Otras pantallas ----------

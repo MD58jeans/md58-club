@@ -64,6 +64,7 @@
         <p class="chico" data-ios-no-safari hidden>Si estás en otro navegador (Instagram, Chrome), abrí este link en <b>Safari</b>.</p>
       </div>
       <div data-android hidden>
+        <button type="button" class="boton" data-ver-guia-android hidden>Activar avisos y guardar la tarjeta</button>
         <button type="button" class="boton" data-boton-instalar hidden>Agregar a la pantalla de inicio</button>
         <p data-android-manual>Tocá el menú <b>⋮</b> de Chrome y elegí <b>Agregar a la pantalla principal</b> (o <b>Instalar app</b>).</p>
       </div>
@@ -109,6 +110,21 @@
     <p>Estás en otro navegador (Instagram, Chrome…). Copiá el link y pegalo en <b>Safari</b>.</p>
     <button type="button" class="boton" data-copiar>Copiar link</button>
     <p class="chico" data-copiado hidden>✓ Copiado. Abrí Safari y pegalo arriba.</p>
+  </div>
+</template>
+<template id="t-guia-android">
+  <div class="guia-fondo" data-guia>
+    <div class="guia" role="dialog" aria-modal="true" aria-labelledby="ga-titulo">
+      <h2 id="ga-titulo">Dos toques y listo 🙌</h2>
+      <p class="guia-txt">Así te avisamos de tu 15% y de los ingresos en tu talle.</p>
+      <p class="guia-grande">1 · Activá los avisos</p>
+      <button type="button" class="boton" data-g-avisos>🔔 Activar avisos</button>
+      <p class="chico" data-g-avisos-estado>Cuando aparezca el cartel, tocá <b>Permitir</b>.</p>
+      <div class="guia-paso"><p class="guia-grande">2 · Guardá la tarjeta en el celular</p>
+      <button type="button" class="boton secundario" data-g-instalar>📲 Guardar en la pantalla de inicio</button>
+      <p class="chico" data-g-instalar-estado></p></div>
+      <div class="guia-botones"><button type="button" class="boton" data-listo>Listo</button><button type="button" class="link" data-cerrar>Más tarde</button></div>
+    </div>
   </div>
 </template>
 <template id="t-recuperar">

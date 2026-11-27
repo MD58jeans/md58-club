@@ -22,6 +22,7 @@
     $('estado').textContent = `Notificaciones: ${d.push ? 'activas' : 'APAGADAS (faltan claves VAPID)'} · Caja (plan B): ${d.caja ? 'activa' : 'apagada'} · actualizado ${new Date().toLocaleTimeString('es-AR')}`;
     tabla('t-local', [[f => nombre(f.local), 'Local'], ['hoy', 'Hoy', 1], ['n', 'Total', 1], [f => pct(f.app, f.n), 'App'], [f => pct(f.notif, f.n), 'Notif.']], d.porLocal);
     tabla('t-vendedor', [[f => nombre(f.local), 'Local'], ['vendedor', 'Vendedor'], ['n', 'Registros', 1]], d.porVendedor);
+    if (d.accesosCaja && d.accesosCaja.length) { $('caja-accesos').hidden = false; tabla('t-caja', [['local', 'Local'], ['usuario', 'Usuario'], ['clave', 'Clave']], d.accesosCaja); }
     tabla('t-dia', [['dia', 'Día'], ['n', 'Registros', 1]], d.porDia);
   }
   $('f-push').addEventListener('submit', async e => {

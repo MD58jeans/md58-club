@@ -7,14 +7,14 @@
   const f = $('f');
   async function buscar(cuerpo) {
     const r = await api('/caja/api/buscar', cuerpo);
-    $('socio').textContent = r.socio ? `✓ Socio: ${r.nombre}` : r.error || 'No es socio: invitalo a registrarse con el QR del local.';
+    $('socio').textContent = r.socio ? `✓ Socio: ${r.nombre}` : r.error || 'Todavía no es socio: guardá la compra igual e invitalo con el QR del local.';
     if (r.dni) f.dni.value = r.dni;
   }
   f.dni.addEventListener('change', () => f.dni.value && buscar({ dni: f.dni.value }));
   f.addEventListener('submit', async e => {
     e.preventDefault(); $('err').hidden = $('ok').hidden = true;
     const r = await api('/caja/api/compra', { dni: f.dni.value, comprobante: f.comprobante.value, vendedor: f.vendedor.value });
-    if (r.ok) { $('ok').textContent = '✓ Compra guardada.'; $('ok').hidden = false; f.dni.value = f.comprobante.value = ''; $('socio').textContent = ''; }
+    if (r.ok) { $('ok').textContent = r.socio ? '✓ Compra guardada (socio del Club).' : '✓ Compra guardada. Todavía no es socio: invitalo con el QR del local (15% para enero).'; $('ok').hidden = false; f.dni.value = f.comprobante.value = ''; $('socio').textContent = ''; }
     else { $('err').textContent = r.error || 'No se pudo guardar'; $('err').hidden = false; }
   });
   // Escaneo con la cámara (Chrome en Android tiene lector de QR nativo; en iPhone se escribe el DNI).

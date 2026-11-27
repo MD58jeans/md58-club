@@ -22,6 +22,9 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
   const limRegistro = limitador(Number(env.LIMITE_REGISTRO || 20), 10 * 60e3);   // por IP cada 10 min (un local con wifi compartido registra muchos)
   const limRecuperar = limitador(5, 10 * 60e3);
   const cajaActiva = env.CAJA_ACTIVA === '1';
+  // Claves de caja: si no vienen en CAJA_CLAVES, se derivan del SECRET (una por local, fijas) y gerencia las ve en el panel.
+  const claveCaja = cod => require('crypto').createHmac('sha256', SECRET).update('caja:' + cod).digest('hex').slice(0, 10);
+  const CLAVES_CAJA = env.CAJA_CLAVES || Object.keys(LOCALES).map(c => `${c}:${claveCaja(c)}`).join(',');
 
   const sesion = cl => tok.firmar(SECRET, { t: 's', id: cl.id, v: cl.token_version });
   const linkVerificar = cl => `${BASE}/v/${tok.firmar(SECRET, { t: 'e', id: cl.id, email: cl.email, exp: Date.now() + 7 * 864e5 })}`;
@@ -136,7 +139,8 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
     if (!quien) return pedirClave(res, 'MD58 Club panel');
     const p = url.pathname;
     if (req.method === 'GET' && p === '/panel') return estatico(res, 'panel.html');
-    if (req.method === 'GET' && p === '/panel/api/resumen') return json(res, { usuario: quien, ...(await club.resumen(pool)), locales: LOCALES, push: push.activo, caja: cajaActiva });
+    if (req.method === 'GET' && p === '/panel/api/resumen') return json(res, { usuario: quien, ...(await club.resumen(pool)), locales: LOCALES, push: push.activo, caja: cajaActiva,
+      accesosCaja: cajaActiva && !env.CAJA_CLAVES ? Object.entries(LOCALES).map(([c, l]) => ({ local: l.nombre, usuario: c, clave: claveCaja(c) })) : [] });
     if (req.method === 'GET' && p === '/panel/export.csv') {
       const csv = await club.exportarCsv(pool, quien);
       cabeceras(res, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="md58club_socios_${new Date().toISOString().slice(0, 10)}.csv"`, 'Cache-Control': 'no-store' });
@@ -166,7 +170,7 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
 
   async function rutaCaja(req, res, url) {
     if (!cajaActiva) { cabeceras(res); res.writeHead(404); res.end('No existe'); return; }
-    const local = usuarioBasic(req.headers.authorization, env.CAJA_CLAVES);   // usuario = código del local (ej. las_vegas)
+    const local = usuarioBasic(req.headers.authorization, CLAVES_CAJA);   // usuario = código del local (ej. las_vegas)
     if (!local || !LOCALES[local]) return pedirClave(res, 'MD58 Club caja');
     const p = url.pathname;
     if (req.method === 'GET' && p === '/caja') return estatico(res, 'caja.html');
