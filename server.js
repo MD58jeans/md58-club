@@ -70,7 +70,7 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
     if (req.method === 'GET' && p === '/manifest.webmanifest') {
       // Manifest por socio: start_url lleva su sesión, así la app instalada (que en iPhone no comparte datos con Safari) abre su tarjeta.
       const t = url.searchParams.get('t'); const d = t && tok.verificar(SECRET, t);
-      const m = { name: 'MD58 Club', short_name: 'MD58 Club', lang: 'es-AR', display: 'standalone', background_color: '#000000', theme_color: '#000000',
+      const m = { name: 'MD58 Club', short_name: 'MD58 Club', lang: 'es-AR', display: 'standalone', background_color: '#1D2046', theme_color: '#1D2046',
         start_url: d && d.t === 's' ? `/t/${t}` : '/tarjeta', scope: '/', id: '/md58-club',
         icons: [{ src: '/iconos/icono-192.png', sizes: '192x192', type: 'image/png' }, { src: '/iconos/icono-512.png', sizes: '512x512', type: 'image/png' },
           { src: '/iconos/icono-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] };

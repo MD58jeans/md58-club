@@ -1,12 +1,13 @@
-:root { --negro:#0b0b0b; --blanco:#fff; --gris:#6b6b6b; --borde:#d9d9d9; --fondo:#f5f5f3; --error:#b3261e; --ok:#1e6b3a; }
+/* Identidad MD58 (Axel, 27/11/2026): --negro es el navy de la marca; --fondo el crudo; --naranja solo como acento chico. */
+:root { --negro:#1D2046; --blanco:#fff; --gris:#5f6168; --borde:#dcd6ca; --fondo:#F2EEE6; --naranja:#E8692A; --error:#b3261e; --ok:#1e6b3a; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; }
 body { font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--fondo); color: var(--negro);
   padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
-.marca { background: var(--negro); color: var(--blanco); padding: 14px 16px; display: flex; align-items: baseline; gap: 8px; }
-.logo { font-weight: 800; letter-spacing: .04em; font-size: 22px; }
-.club { font-weight: 600; letter-spacing: .35em; font-size: 12px; }
+.marca { background: var(--negro); color: var(--blanco); padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+.logo { height: 20px; width: auto; display: block; }
+.club { font-weight: 500; letter-spacing: .45em; font-size: 12px; }
 main { max-width: 480px; margin: 0 auto; padding: 16px; }
 h1 { font-size: 24px; margin: 8px 0 4px; }
 h2 { font-size: 17px; margin: 0 0 6px; }
@@ -32,7 +33,8 @@ input[aria-invalid="true"] { border-color: var(--error); }
 .chico { font-size: 14px; color: var(--gris); }
 .cargando { color: var(--gris); }
 .tarjeta { background: var(--negro); color: var(--blanco); border-radius: 18px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
-.t-arriba { display: flex; align-items: baseline; gap: 8px; }
+.t-arriba { display: flex; align-items: center; gap: 10px; }
+.t-arriba::after { content: ""; flex: 1; height: 3px; max-width: 34px; margin-left: auto; background: var(--naranja); border-radius: 2px; }
 .t-nombre { font-size: 22px; font-weight: 700; margin-top: 18px; overflow-wrap: anywhere; }
 .t-socio { color: #cfcfcf; font-size: 15px; margin-top: 2px; letter-spacing: .03em; }
 .t-qr { background: var(--blanco); border-radius: 12px; padding: 10px; margin: 16px auto 0; width: 200px; height: 200px; }
