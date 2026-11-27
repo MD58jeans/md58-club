@@ -161,9 +161,19 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
     }
     if (req.method === 'POST' && p === '/panel/api/push-prueba') {
       if (req.headers['x-panel'] !== '1') return json(res, { error: 'no' }, 403);
-      const b = await leerJson(req); const cl = await club.porDni(pool, validar.dni(b.dni) || '');
-      if (!cl) return json(res, { error: 'no existe ese socio' }, 404);
+      const b = await leerJson(req); const dni = validar.dni(b.dni);
+      if (!dni) return json(res, { error: 'DNI inválido (7 u 8 números, sin puntos)' }, 422);
+      const cl = await club.porDni(pool, dni);
+      if (!cl) return json(res, { error: 'Ese DNI no está registrado en el Club. Que entre al link y complete el registro hasta ver su tarjeta.' }, 404);
+      if (!cl.fecha_alta) return json(res, { error: 'Ese DNI está como cliente histórico pero todavía no se registró. Que complete el registro con el link.' }, 404);
+      const disp = (await pool.query('SELECT plataforma, activo, ultimo_error, creado_en FROM dispositivos WHERE cliente_id=$1 ORDER BY creado_en DESC', [cl.id])).rows;
+      if (!disp.some(d => d.activo)) return json(res, { enviados: 0, fallidos: 0, motivo: disp.length
+        ? 'Sus avisos dejaron de valer (se desinstaló o se volvieron a activar en otro lado). Que abra la tarjeta desde el ícono y toque "Activar avisos" de nuevo.'
+        : 'Todavía no activó los avisos. Que abra la tarjeta (en iPhone, desde el ícono de inicio) y toque "Activar avisos" → Permitir.' });
       const r = await push.enviar(pool, cl.id, { titulo: 'MD58 Club', cuerpo: String(b.texto || 'Notificación de prueba').slice(0, 140), url: '/tarjeta' });
+      if (r.fallidos) { const e = (await pool.query('SELECT plataforma, ultimo_error FROM dispositivos WHERE cliente_id=$1 AND ultimo_error IS NOT NULL ORDER BY creado_en DESC LIMIT 3', [cl.id])).rows;
+        r.motivo = 'Error del servicio de avisos: ' + e.map(x => `${x.plataforma || '?'} ${x.ultimo_error}`).join(' · ') + '. Que toque "Activar avisos" de nuevo en su tarjeta.'; }
+      r.dispositivos = disp.length;
       await club.auditar(pool, 'push_prueba', cl.id, quien, r);
       return json(res, r);
     }
