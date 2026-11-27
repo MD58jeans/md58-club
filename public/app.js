@@ -101,7 +101,20 @@
     if (instalada()) api('/api/socio/instalada', { metodo: 'POST', token });
     else {
       $(f, '[data-instalar]').hidden = false;
-      if (esIOS) { $(f, '[data-ios]').hidden = false; if (!esSafari) $(f, '[data-ios-no-safari]').hidden = false; }
+      if (esIOS) {
+        $(f, '[data-ios]').hidden = false;
+        if (!esSafari) {   // Instagram, Chrome, etc.: en iPhone solo Safari puede agregar a inicio
+          const o = plantilla('t-otro-navegador');
+          $(o, '[data-copiar]').addEventListener('click', async ev => {
+            try { await navigator.clipboard.writeText(location.origin + '/t/' + token); } catch {}
+            ev.target.textContent = 'Copiado'; ev.target.parentNode.querySelector('[data-copiado]').hidden = false;
+          });
+          $(f, '[data-instalar]').before(o);
+        } else {
+          const ver = $(f, '[data-ver-guia]'); ver.hidden = false; ver.addEventListener('click', () => guiaIOS(true));
+          setTimeout(() => guiaIOS(false), recienRegistrado ? 1200 : 600);   // la guía se abre sola (una vez por día si la cierran)
+        }
+      }
       else {
         $(f, '[data-android]').hidden = false;
         const bi = $(f, '[data-boton-instalar]');
@@ -117,6 +130,22 @@
     app.replaceChildren(f);
   }
 
+  // Guía de 3 pasos para "Agregar a inicio" en iPhone (Safari no tiene botón de instalar).
+  function guiaIOS(forzar) {
+    const CLAVE = 'md58club_guia_cerrada';
+    try { if (!forzar && Date.now() - Number(localStorage.getItem(CLAVE) || 0) < 864e5) return; } catch {}
+    if (document.querySelector('[data-guia]')) return;
+    const g = plantilla('t-guia-ios'); const raiz = $(g, '[data-guia]');
+    const pasos = [...raiz.querySelectorAll('[data-paso]')], puntos = [...raiz.querySelectorAll('[data-punto]')];
+    const sig = $(raiz, '[data-sig]');
+    // Los 3 pasos a la vista a la vez: cuando el cliente toca ··· el menú de Safari tapa la página, así que tiene que poder leer todo antes.
+    pasos.forEach(p => { p.hidden = false; }); puntos.forEach(p => p.classList.add('activo')); sig.textContent = 'Entendido';
+    const cerrar = () => { try { localStorage.setItem(CLAVE, String(Date.now())); } catch {} raiz.remove(); };
+    sig.addEventListener('click', cerrar);
+    $(raiz, '[data-cerrar]').addEventListener('click', cerrar);
+    document.body.append(raiz);
+  }
+
   function configurarNotificaciones(f, d, token) {
     const caja = $(f, '[data-notif]'), boton = $(f, '[data-activar]'), estado = $(f, '[data-notif-estado]');
     const soporta = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
@@ -126,6 +155,10 @@
       return;
     }
     caja.hidden = false;
+    if (instalada() && Notification.permission === 'default') {   // primera vez desde el ícono: es lo único que falta, va arriba de todo
+      caja.classList.add('paso-final'); caja.querySelector('h2').textContent = 'Último paso: activá las notificaciones 🔔';
+      const sec = f.querySelector('section'); if (sec) sec.prepend(caja);
+    }
     if (Notification.permission === 'granted') { boton.hidden = true; estado.textContent = '✓ Notificaciones activadas.'; }
     if (Notification.permission === 'denied') { boton.hidden = true; estado.textContent = 'Las notificaciones están bloqueadas. Activalas desde la configuración del celular.'; }
     let reg = null; navigator.serviceWorker.ready.then(r => { reg = r; });

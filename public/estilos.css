@@ -48,3 +48,21 @@ input[aria-invalid="true"] { border-color: var(--error); }
 .pie a { color: var(--gris); }
 .terminos { white-space: pre-wrap; background: var(--blanco); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; font-size: 14px; }
 @media (max-width: 360px) { .fila2 { grid-template-columns: 1fr; } }
+
+/* Guía paso a paso para iPhone */
+.guia-fondo { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.guia { background: var(--blanco); width: 100%; max-width: 480px; border-radius: 20px 20px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 30px rgba(0,0,0,.25); max-height: 88vh; overflow: auto; }
+.guia-pasos { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
+.guia-pasos span { width: 26px; height: 5px; border-radius: 3px; background: var(--borde); }
+.guia-pasos span.activo { background: var(--negro); }
+.guia-txt { margin: 0 0 10px; color: #333; }
+.guia-grande { font-size: 17px; font-weight: 700; margin: 12px 0 4px; }
+.guia-paso + .guia-paso { border-top: 1px solid var(--borde); margin-top: 8px; }
+.guia-dibujo { width: 66%; max-height: 58px; height: auto; display: block; margin: 4px auto; }
+.guia-botones { display: grid; gap: 10px; margin-top: 12px; justify-items: center; }
+.guia-botones .boton { width: 100%; }
+.guia-flecha { position: fixed; right: 18px; bottom: 6px; font-size: 44px; font-weight: 900; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.6); animation: rebote 1s ease-in-out infinite; z-index: 51; }
+@keyframes rebote { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .guia-flecha { animation: none; } }
+.destacado { border: 2px solid var(--negro); }
+.paso-final { border: 2px solid var(--negro); }

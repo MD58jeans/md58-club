@@ -54,6 +54,7 @@
     <div class="aviso" data-email hidden>Te mandamos un mail para confirmar tu email. <button type="button" class="link" data-reenviar>Reenviar</button></div>
     <div class="bloque" data-instalar hidden>
       <h2>Guardá tu tarjeta en el celular</h2>
+      <button type="button" class="boton" data-ver-guia hidden>Ver cómo, paso a paso</button>
       <div data-ios hidden>
         <ol>
           <li>En Safari, tocá <b>Compartir</b> <span class="icono-compartir" aria-hidden="true">⬆︎</span>. En los iPhone nuevos está adentro de los <b>tres puntitos (···)</b>, abajo a la derecha.</li>
@@ -75,6 +76,40 @@
     </div>
     <label class="check bloque"><input type="checkbox" data-promos> <span>Quiero recibir novedades y beneficios de MD58.</span></label>
   </section>
+</template>
+<template id="t-guia-ios">
+  <div class="guia-fondo" data-guia>
+    <div class="guia" role="dialog" aria-modal="true" aria-labelledby="guia-titulo">
+            <div class="guia-paso" data-paso="1">
+        <h2 id="guia-titulo">Guardá tu tarjeta en el celular</h2>
+        <p class="guia-txt">Son 3 toques. Leelos y después hacelos.</p>
+        <p class="guia-grande">1 · Tocá <b>···</b> abajo a la derecha</p>
+        <svg class="guia-dibujo" viewBox="0 0 300 70" aria-hidden="true"><rect x="2" y="8" width="296" height="54" rx="27" fill="#ececec"/><rect x="18" y="20" width="34" height="30" rx="15" fill="#fff"/><path d="M38 28l-8 7 8 7" stroke="#555" stroke-width="3" fill="none"/><rect x="64" y="20" width="170" height="30" rx="15" fill="#fff"/><text x="149" y="40" font-size="14" text-anchor="middle" fill="#333">md58club.com</text><circle cx="262" cy="35" r="19" fill="#0b0b0b"/><circle cx="252" cy="35" r="3" fill="#fff"/><circle cx="262" cy="35" r="3" fill="#fff"/><circle cx="272" cy="35" r="3" fill="#fff"/></svg>
+        <p class="chico">Si en tu iPhone ves abajo el botón <b>Compartir</b> <span class="icono-compartir">⬆︎</span>, tocá ese y salteá al paso 3.</p>
+      </div>
+      <div class="guia-paso" data-paso="2" hidden>
+        <p class="guia-grande">2 · Tocá <b>Compartir</b></p>
+        <svg class="guia-dibujo" viewBox="0 0 300 120" aria-hidden="true"><rect x="40" y="6" width="220" height="108" rx="16" fill="#fff" stroke="#d9d9d9"/><rect x="56" y="20" width="188" height="36" rx="10" fill="#0b0b0b"/><path d="M90 46v-16m0 0l-6 6m6-6l6 6M82 34v14h16V34" stroke="#fff" stroke-width="2.5" fill="none"/><text x="160" y="43" font-size="15" text-anchor="middle" fill="#fff" font-weight="700">Compartir</text><rect x="56" y="66" width="188" height="36" rx="10" fill="#f2f2f2"/><text x="150" y="89" font-size="14" text-anchor="middle" fill="#888">Otras opciones…</text></svg>
+        <p class="chico">Se abre un panel con contactos y apps: <b>no toques ninguno</b>, no se comparte con nadie.</p>
+      </div>
+      <div class="guia-paso" data-paso="3" hidden>
+        <p class="guia-grande">3 · Deslizá hacia arriba y tocá <b>Agregar a inicio</b></p>
+        <svg class="guia-dibujo" viewBox="0 0 300 120" aria-hidden="true"><rect x="20" y="6" width="260" height="108" rx="16" fill="#fff" stroke="#d9d9d9"/><text x="40" y="34" font-size="14" fill="#999">Copiar</text><line x1="36" y1="46" x2="264" y2="46" stroke="#eee"/><rect x="30" y="52" width="240" height="40" rx="10" fill="#0b0b0b"/><text x="46" y="77" font-size="15" fill="#fff" font-weight="700">Agregar a inicio</text><rect x="236" y="61" width="22" height="22" rx="5" fill="none" stroke="#fff" stroke-width="2"/><path d="M247 66v12M241 72h12" stroke="#fff" stroke-width="2"/><text x="40" y="108" font-size="13" fill="#bbb">Agregar marcador  ✗</text></svg>
+        <p class="chico">Ojo: <b>no</b> es "Agregar marcador" ni "Favoritos". Después tocá <b>Agregar</b> arriba a la derecha.</p>
+        <p class="guia-grande">Listo: abrí <b>MD58 Club</b> desde el ícono nuevo 📲</p>
+      </div>
+      <div class="guia-botones"><button type="button" class="boton" data-sig>Entendido</button><button type="button" class="link" data-cerrar>Más tarde</button></div>
+    </div>
+    <div class="guia-flecha" data-flecha aria-hidden="true">↓</div>
+  </div>
+</template>
+<template id="t-otro-navegador">
+  <div class="bloque destacado">
+    <h2>Abrilo en Safari para guardar tu tarjeta</h2>
+    <p>Estás en otro navegador (Instagram, Chrome…). Copiá el link y pegalo en <b>Safari</b>.</p>
+    <button type="button" class="boton" data-copiar>Copiar link</button>
+    <p class="chico" data-copiado hidden>✓ Copiado. Abrí Safari y pegalo arriba.</p>
+  </div>
 </template>
 <template id="t-recuperar">
   <section>
