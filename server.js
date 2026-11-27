@@ -184,8 +184,8 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
       return json(res, await club.cajaBuscar(pool, dni));
     }
     if (req.method === 'POST' && p === '/caja/api/compra') {
-      const b = await leerJson(req); const dni = validar.dni(b.dni); const comp = validar.texto(b.comprobante, 40);
-      if (!dni || !comp) return json(res, { error: 'Falta el DNI o el número de comprobante' }, 422);
+      const b = await leerJson(req); const dni = validar.dni(b.dni); const comp = b.comprobante ? validar.texto(b.comprobante, 40) : null;
+      if (!dni) return json(res, { error: 'Revisá el DNI (7 u 8 números)' }, 422);
       const vend = b.vendedor && (VENDEDORES[local] || []).includes(b.vendedor) ? b.vendedor : null;
       const r = await club.cajaCompra(pool, { dni, local: LOCALES[local].znube, vendedor: vend, comprobante: comp, quien: 'caja:' + local });
       return json(res, r, r.ok ? 200 : 409);

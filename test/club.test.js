@@ -287,10 +287,10 @@ test('iPhone: la página /t/<sesión> trae el manifest del socio (el ícono inst
 
 test('caja (plan B): guarda el DNI aunque no sea socio; claves derivadas y visibles solo en el panel', async () => {
   const C = { Authorization: auth('las_vegas', 'caja-clave-1'), 'X-Caja': '1' };
-  const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '45307645', comprobante: 'FCV B 0001-00099999' } });
+  const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999001', comprobante: 'FCV B 0001-00099999' } });
   assert.equal(r.status, 200); assert.equal(r.j.socio, false);
   const cc = (await pool.query("SELECT dni, cliente_id FROM compras_caja WHERE comprobante='FCV B 0001-00099999'")).rows[0];
-  assert.deepEqual(cc, { dni: '45307645', cliente_id: null });
+  assert.deepEqual(cc, { dni: '30999001', cliente_id: null });
   // Sin CAJA_CLAVES: cada local tiene su clave derivada, y el panel las muestra
   const env2 = { ...env, CAJA_CLAVES: '' }; const s2 = crearApp({ pool, env: env2 });
   await new Promise(ok => s2.listen(0, '127.0.0.1', ok)); const b2 = `http://127.0.0.1:${s2.address().port}`;
@@ -299,4 +299,11 @@ test('caja (plan B): guarda el DNI aunque no sea socio; claves derivadas y visib
   assert.equal((await fetch(b2 + '/caja', { headers: { Authorization: auth('las_vegas', lv.clave) } })).status, 200);
   assert.equal((await fetch(b2 + '/caja', { headers: { Authorization: auth('pilar', lv.clave) } })).status, 401);   // la clave de un local no abre otro
   await new Promise(ok => s2.close(ok));
+});
+
+test('caja rápida: alcanza con el DNI (sin comprobante), varias veces', async () => {
+  const C = { Authorization: auth('las_vegas', 'caja-clave-1'), 'X-Caja': '1' };
+  for (let k = 0; k < 2; k++) { const r = await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '30999002' } }); assert.equal(r.status, 200, JSON.stringify(r.j)); }
+  assert.equal((await pool.query("SELECT count(*)::int n FROM compras_caja WHERE dni='30999002' AND comprobante IS NULL")).rows[0].n, 2);
+  assert.equal((await pedir('POST', '/caja/api/compra', { headers: C, cuerpo: { dni: '12' } })).status, 422);
 });

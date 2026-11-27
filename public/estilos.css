@@ -66,3 +66,5 @@ input[aria-invalid="true"] { border-color: var(--error); }
 @media (prefers-reduced-motion: reduce) { .guia-flecha { animation: none; } }
 .destacado { border: 2px solid var(--negro); }
 .paso-final { border: 2px solid var(--negro); }
+.dni-grande { font-size: 28px; letter-spacing: .08em; text-align: center; min-height: 64px; }
+details summary { cursor: pointer; margin: 4px 0; }
