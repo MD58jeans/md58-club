@@ -23,7 +23,7 @@ services:
         value: https://md58club.com
       # CLUB_VERSION: se cambia en cada entrega para que Render vuelva a desplegar el último código (repo público sin auto-deploy).
       - key: CLUB_VERSION
-        value: "2026-11-27m"
+        value: "2026-11-27n"
       - key: NODE_VERSION
         value: "22"
       - key: CAJA_ACTIVA
