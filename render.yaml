@@ -11,13 +11,16 @@ services:
     startCommand: node server.js
     healthCheckPath: /salud
     autoDeploy: false
-    # domains: md58club.com y www.md58club.com se agregan cuando el dominio esté comprado (ver DECISIONES).
+    domains:
+      - md58club.com
+      - www.md58club.com
     envVars:
       - key: DATABASE_URL
         fromDatabase: { name: md58-club-db, property: connectionString }
       - key: SECRET
         generateValue: true
-      # BASE_URL (https://md58club.com) se agrega con el dominio; mientras tanto usa la dirección .onrender.com.
+      - key: BASE_URL
+        value: https://md58club.com
       - key: NODE_VERSION
         value: "22"
       - key: CAJA_ACTIVA
