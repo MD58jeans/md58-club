@@ -246,3 +246,21 @@ test('email por Resend: manda bien, y si falla no rompe; sin clave queda en cons
   assert.deepEqual(await caido.enviar({ para: 'a@b.com', asunto: 'x', texto: 'y' }), { ok: false });
   assert.equal(crearCorreo({ EMAIL_PROVEEDOR: 'resend' }).proveedor, 'consola');
 });
+
+test('panel: subir base histórica por CSV (con clave, no duplica, saltea "revisar")', async () => {
+  const csv = 'telefono,nombre,dni,locales,origenes,consentimiento,revisar\n' +
+    '5491170000001,Hist Panel 1,,LV Las Vegas,contactos_local,no,\n' +
+    '5491170000002,Flete,,LV Las Vegas,contactos_local,no,posible no cliente\n' +
+    '1170000003,Hist Panel 3,27000003,Pilar,tarjetas,no,\n';
+  const sinClave = await fetch(base + '/panel/api/importar-historicos', { method: 'POST', headers: { 'X-Panel': '1' }, body: csv });
+  assert.equal(sinClave.status, 401);
+  const h = { Authorization: auth('Braian', 'clave-larga-1'), 'X-Panel': '1', 'Content-Type': 'text/csv' };
+  const sinX = await fetch(base + '/panel/api/importar-historicos', { method: 'POST', headers: { Authorization: h.Authorization }, body: csv });
+  assert.equal(sinX.status, 403);
+  let r = await fetch(base + '/panel/api/importar-historicos', { method: 'POST', headers: h, body: csv }); let d = await r.json();
+  assert.equal(r.status, 200); assert.equal(d.nuevas, 2); assert.equal(d.salteadas_por_revisar, 1);
+  r = await fetch(base + '/panel/api/importar-historicos', { method: 'POST', headers: h, body: csv }); d = await r.json();
+  assert.equal(d.nuevas, 0); assert.equal(d.actualizadas, 2);   // subirla de nuevo no duplica
+  r = await fetch(base + '/panel/api/importar-historicos', { method: 'POST', headers: h, body: 'a,b\n1,2\n' });
+  assert.equal(r.status, 400);
+});

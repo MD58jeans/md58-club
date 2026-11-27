@@ -10,6 +10,10 @@
   <h2>Por vendedor</h2><div class="tabla-wrap"><table id="t-vendedor"></table></div>
   <h2>Por día</h2><div class="tabla-wrap"><table id="t-dia"></table></div>
   <h2>Exportar</h2><p><a class="boton secundario" href="/panel/export.csv">Descargar socios (CSV, datos personales)</a></p>
+  <h2>Subir base de clientes históricos</h2>
+  <p class="chico">En el Drive: abrí la hoja de la base → Archivo → Descargar → <b>Valores separados por comas (.csv)</b>. Elegí ese archivo acá. Se puede subir más de una vez: no duplica y nunca pisa a los socios.</p>
+  <form id="f-hist" class="fila-form"><input name="archivo" type="file" accept=".csv,text/csv"><button class="boton">Subir</button></form>
+  <p class="chico" id="hist-res"></p>
   <h2>Notificación de prueba</h2>
   <form id="f-push" class="fila-form"><input name="dni" inputmode="numeric" placeholder="DNI del socio"><input name="texto" placeholder="Texto (opcional)"><button class="boton">Enviar</button></form>
   <p class="chico" id="push-res"></p>

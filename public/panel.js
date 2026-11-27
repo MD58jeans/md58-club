@@ -29,5 +29,16 @@
     const r = await fetch('/panel/api/push-prueba', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Panel': '1' }, body: JSON.stringify({ dni: f.dni.value, texto: f.texto.value }) });
     const d = await r.json(); $('push-res').textContent = r.ok ? `Enviadas: ${d.enviados} · fallidas: ${d.fallidos}${d.motivo ? ' (' + d.motivo + ')' : ''}` : (d.error || 'Error');
   });
+  $('f-hist').addEventListener('submit', async e => {
+    e.preventDefault(); const a = e.target.archivo.files[0]; const out = $('hist-res');
+    if (!a) { out.textContent = 'Elegí el archivo CSV primero.'; return; }
+    out.textContent = 'Subiendo y cargando… (puede tardar 1-2 minutos)';
+    try {
+      const r = await fetch('/panel/api/importar-historicos', { method: 'POST', headers: { 'Content-Type': 'text/csv', 'X-Panel': '1' }, body: await a.text() });
+      const d = await r.json();
+      out.textContent = r.ok ? `Listo: ${n(d.leidas)} filas leídas · ${n(d.nuevas)} nuevas · ${n(d.actualizadas)} actualizadas · ${n(d.ya_socios)} ya eran socios · ${n(d.invalidas)} sin celular válido · ${n(d.conflictos)} con conflicto · ${n(d.salteadas_por_revisar)} salteadas (marcadas "revisar").` : (d.error || 'Error');
+      cargar().catch(() => {});
+    } catch (err) { out.textContent = 'No se pudo subir: ' + err.message; }
+  });
   await cargar(); setInterval(() => cargar().catch(() => {}), 60000);
 })();

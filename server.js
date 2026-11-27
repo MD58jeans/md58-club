@@ -8,7 +8,7 @@ const tok = require('./lib/token');
 const club = require('./lib/club');
 const { crearCorreo } = require('./lib/correo');
 const { crearPush } = require('./lib/push');
-const { cabeceras, json, leerJson, usuarioBasic, pedirClave, limitador, ipDe } = require('./lib/http');
+const { cabeceras, json, leerJson, leerTexto, usuarioBasic, pedirClave, limitador, ipDe } = require('./lib/http');
 
 const LOCALES = require('./locales.json').locales;
 const VENDEDORES = require('./vendedores.json').vendedores;
@@ -132,6 +132,17 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
       const csv = await club.exportarCsv(pool, quien);
       cabeceras(res, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="md58club_socios_${new Date().toISOString().slice(0, 10)}.csv"`, 'Cache-Control': 'no-store' });
       res.end('\uFEFF' + csv); return;
+    }
+    if (req.method === 'POST' && p === '/panel/api/importar-historicos') {
+      // Base histórica (CSV descargado de la hoja del Drive restringido). Solo gerencia; queda auditado quién la subió.
+      if (req.headers['x-panel'] !== '1') return json(res, { error: 'no' }, 403);
+      const { leerCsv } = require('./scripts/importar_historicos');
+      const filas = leerCsv(await leerTexto(req));
+      if (!filas.length || !('telefono' in filas[0])) return json(res, { error: 'El archivo no tiene la columna "telefono". Descargá la hoja como CSV sin cambiarle los títulos.' }, 400);
+      const usar = filas.filter(f => !String(f.revisar || '').trim());
+      const t = await club.importarHistoricos(pool, usar, validar);
+      await club.auditar(pool, 'import_historicos_panel', null, quien, t);
+      return json(res, { ...t, salteadas_por_revisar: filas.length - usar.length });
     }
     if (req.method === 'POST' && p === '/panel/api/push-prueba') {
       if (req.headers['x-panel'] !== '1') return json(res, { error: 'no' }, 403);
