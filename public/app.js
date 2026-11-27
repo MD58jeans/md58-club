@@ -122,7 +122,7 @@
     const soporta = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
     if (!d.push) return;   // el servidor todavía no tiene claves de notificaciones
     if (!soporta) {
-      if (esIOS && !instalada()) { caja.hidden = false; boton.disabled = true; estado.textContent = 'En iPhone primero agregá la tarjeta a tu pantalla de inicio (pasos de arriba) y abrila desde el ícono.'; }
+      if (esIOS && !instalada()) { caja.hidden = false; boton.disabled = true; estado.textContent = 'En iPhone las notificaciones se activan desde el ícono: primero agregá la tarjeta a tu pantalla de inicio (pasos de arriba), abrí MD58 Club desde el ícono nuevo y tocá este botón ahí.'; }
       return;
     }
     caja.hidden = false;
