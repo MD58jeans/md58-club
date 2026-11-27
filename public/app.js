@@ -140,7 +140,7 @@
       item(true, 'Ya sos socio');
       item(guardada, guardada ? 'Tarjeta guardada en el celular' : 'Agregá la tarjeta a la pantalla de inicio (no alcanza con tenerla abierta) — tocá acá', () => esIOS ? guiaIOS(true) : guiaAndroid(d, token, true));
       item(avisos, avisos ? 'Avisos activados' : (esIOS && !instalada() ? 'Activá los avisos (desde el ícono, después del paso anterior)' : 'Activá los avisos — tocá acá'), esIOS && !instalada() ? null : () => { const b = document.querySelector('[data-activar]'); if (b && !b.disabled && !b.hidden) b.click(); else if (esAndroid) guiaAndroid(d, token, true); });
-      const tarj = f.querySelector('.tarjeta'); if (tarj) tarj.after(lista);
+      const tarj = f.querySelector('.tarjeta'); if (tarj) tarj.before(lista);   // lo pendiente va ARRIBA de todo, es lo primero que ve
     }
     app.replaceChildren(f);
   }
