@@ -320,4 +320,6 @@ test('agente: lectura de cargas de caja solo con su clave', async () => {
   assert.equal(res.claveAgente.length, 32);
   const r = await pedir('GET', '/agente/api/compras-caja?desde=2020-01-01', { headers: { Authorization: 'Bearer ' + res.claveAgente } });
   assert.equal(r.status, 200); assert.ok(r.j.filas.some(f => f.fin_factura === '68'));
+  const t = await pedir('GET', '/agente/api/resumen', { headers: { Authorization: 'Bearer ' + res.claveAgente } });
+  assert.equal(t.status, 200); assert.ok(t.j.totales && Array.isArray(t.j.porHora)); assert.ok(!JSON.stringify(t.j).includes('@'));
 });

@@ -214,6 +214,12 @@ function crearApp({ pool, env = process.env, correo = crearCorreo(env), push = c
     const h = req.headers.authorization || '';
     if (!(h.startsWith('Bearer ') && require('crypto').timingSafeEqual(Buffer.from(require('crypto').createHash('sha256').update(h.slice(7)).digest()), Buffer.from(require('crypto').createHash('sha256').update(claveAgente).digest()))))
       return json(res, { error: 'no autorizado' }, 401);
+    if (req.method === 'GET' && url.pathname === '/agente/api/resumen') {   // solo totales (sin datos personales): registros por local y día
+      const r = await club.resumen(pool);
+      const porHora = (await pool.query(`SELECT local_alta AS local, to_char(fecha_alta AT TIME ZONE 'America/Argentina/Buenos_Aires', 'YYYY-MM-DD HH24') AS hora, count(*)::int AS n
+        FROM clientes WHERE fecha_alta IS NOT NULL AND fecha_alta > now() - interval '7 days' GROUP BY 1, 2 ORDER BY 2`)).rows;
+      return json(res, { totales: r.totales, porLocal: r.porLocal, porDia: r.porDia, porHora });
+    }
     if (req.method === 'GET' && url.pathname === '/agente/api/compras-caja') {
       const desde = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get('desde') || '') ? url.searchParams.get('desde') : new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
       const r = await pool.query(`SELECT cc.id, cc.dni, cc.local, cc.vendedor, cc.comprobante, cc.fin_factura, cc.fecha, cc.cargado_por, (c.fecha_alta IS NOT NULL) AS socio
